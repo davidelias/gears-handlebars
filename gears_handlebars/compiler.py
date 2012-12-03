@@ -6,7 +6,7 @@ SOURCE = '\n'.join((
     "(function() {",
     "  var template  = Handlebars.template,",
     "      templates = Handlebars.templates = Handlebars.templates || {};",
-    "  templates['%(name)s'] = template(%(source)s);",
+    "  templates['%(path_without_suffix)s'] = template(%(processed_source)s);",
     "}).call(this);"))
 
 
@@ -16,9 +16,11 @@ class HandlebarsCompiler(ExecCompiler):
     executable = 'node'
     params = [os.path.join(os.path.dirname(__file__), 'compiler.js')]
 
+    def __init__(self, source=SOURCE):
+        self.source = source
+
     def __call__(self, asset):
         super(HandlebarsCompiler, self).__call__(asset)
-        asset.processed_source = SOURCE % {
-            'name': asset.attributes.path_without_suffix,
-            'source': asset.processed_source,
-        }
+        data = asset.__dict__
+        data.update(asset.attributes.__dict__)
+        asset.processed_source = self.source % data
