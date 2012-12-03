@@ -21,6 +21,9 @@ class HandlebarsCompiler(ExecCompiler):
 
     def __call__(self, asset):
         super(HandlebarsCompiler, self).__call__(asset)
-        data = asset.__dict__
-        data.update(asset.attributes.__dict__)
-        asset.processed_source = self.source % data
+        asset.processed_source = self.source % {
+            'asset': asset,
+            'processed_source': asset.processed_source,
+            'path': asset.attributes.path,
+            'path_without_suffix': asset.attributes.path_without_suffix
+        }
